@@ -114,7 +114,8 @@ bluetooth.profile.pbap.server.enabled?=true
 bluetooth.profile.sap.server.enabled?=true
 bluetooth.profile.ccp.server.enabled?=true
 bluetooth.profile.vcp.controller.enabled?=true
-persist.vendor.bt.aac_frm_ctl.enabled=false
+persist.vendor.bt.aac_frm_ctl.enabled=true
+persist.vendor.bt.aac_vbr_frm_ctl.enabled=false
 persist.vendor.btsatck.absvolfeature=true
 persist.vendor.btstack.connect.peer_earbud=false
 persist.vendor.btstack.enable.splita2dp=true
@@ -238,8 +239,9 @@ vendor.usb.qdss.inst.name=qdss
 vendor.usb.rmnet.func.name=gsi
 vendor.usb.rmnet.inst.name=rmnet
 vendor.usb.rndis.func.name=gsi
-vendor.usb.use_ffs_mtp=0
-vendor.usb.use_gadget_hal=0
+vendor.usb.use_ffs_mtp=1
+vendor.usb.use_gadget_hal=1
+ro.usb.uvc.enabled=true
 
 # WFD
 ro.surface_flinger.force_hwc_copy_for_virtual_displays=true

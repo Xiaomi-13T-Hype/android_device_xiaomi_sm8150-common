@@ -8,7 +8,7 @@ COMMON_PATH := device/xiaomi/sm8150-common
 
 # A/B
 ifeq ($(TARGET_IS_VAB),true)
-BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
+BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := false
 AB_OTA_UPDATER := true
 
 AB_OTA_PARTITIONS += \
@@ -257,6 +257,9 @@ WIFI_HIDL_FEATURE_AWARE := true
 WIFI_HIDL_FEATURE_DUAL_INTERFACE := true
 WIFI_HIDL_UNIFIED_SUPPLICANT_SERVICE_RC_ENTRY := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
+
+# USB / Webcam
+TARGET_BUILD_DEVICE_AS_WEBCAM := true
 
 # Inherit the proprietary files
 include vendor/xiaomi/sm8150-common/BoardConfigVendor.mk

@@ -83,3 +83,12 @@
 /data/vendor/mac_addr(/.*)?                                                                         u:object_r:vendor_wifi_vendor_data_file:s0
 /mnt/vendor/persist/wlan_mac\.bin                                                                   u:object_r:vendor_persist_wcnss_service_file:s0
 /vendor/bin/nv_mac                                                                                  u:object_r:vendor_wcnss_service_exec:s0
+
+# LiveDisplay
+/(vendor|system/vendor)/bin/hw/vendor\.lineage\.livedisplay-service\.xiaomi_sm8150                   u:object_r:hal_lineage_livedisplay_qti_exec:s0
+
+# Dolby
+/data/vendor/dolby(/.*)?                                                                            u:object_r:vendor_data_file:s0
+/vendor/bin/hw/vendor\.dolby\.hardware\.dms@2\.0-service                                            u:object_r:hal_dms_default_exec:s0
+
+

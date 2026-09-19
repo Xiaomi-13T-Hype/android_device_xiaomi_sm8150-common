@@ -95,7 +95,6 @@ if [ -d /config/usb_gadget ]; then
 	fi
 
 	setprop vendor.usb.configfs 1
-	setprop sys.usb.configfs 1
 fi
 
 # update product
@@ -123,57 +122,86 @@ case "$soc_id" in
 esac
 
 #
-# Initialize UVC conifguration.
 #
-if [ -d /config/usb_gadget/g1/functions/uvc.0 ]; then
-	cd /config/usb_gadget/g1/functions/uvc.0
-
-	echo 3072 > streaming_maxpacket
-	echo 1 > streaming_maxburst
-	mkdir control/header/h
-	ln -s control/header/h control/class/fs/
-	ln -s control/header/h control/class/ss
-
-	mkdir -p streaming/uncompressed/u/360p
-	echo "666666\n1000000\n5000000\n" > streaming/uncompressed/u/360p/dwFrameInterval
-
-	mkdir -p streaming/uncompressed/u/720p
-	echo 1280 > streaming/uncompressed/u/720p/wWidth
-	echo 720 > streaming/uncompressed/u/720p/wWidth
-	echo 29491200 > streaming/uncompressed/u/720p/dwMinBitRate
-	echo 29491200 > streaming/uncompressed/u/720p/dwMaxBitRate
-	echo 1843200 > streaming/uncompressed/u/720p/dwMaxVideoFrameBufferSize
-	echo 5000000 > streaming/uncompressed/u/720p/dwDefaultFrameInterval
-	echo "5000000\n" > streaming/uncompressed/u/720p/dwFrameInterval
-
-	mkdir -p streaming/mjpeg/m/360p
-	echo "666666\n1000000\n5000000\n" > streaming/mjpeg/m/360p/dwFrameInterval
-
-	mkdir -p streaming/mjpeg/m/720p
-	echo 1280 > streaming/mjpeg/m/720p/wWidth
-	echo 720 > streaming/mjpeg/m/720p/wWidth
-	echo 29491200 > streaming/mjpeg/m/720p/dwMinBitRate
-	echo 29491200 > streaming/mjpeg/m/720p/dwMaxBitRate
-	echo 1843200 > streaming/mjpeg/m/720p/dwMaxVideoFrameBufferSize
-	echo 5000000 > streaming/mjpeg/m/720p/dwDefaultFrameInterval
-	echo "5000000\n" > streaming/mjpeg/m/720p/dwFrameInterval
-
-	echo 0x04 > /config/usb_gadget/g1/functions/uvc.0/streaming/mjpeg/m/bmaControls
-
-	mkdir -p streaming/h264/h/960p
-	echo 1920 > streaming/h264/h/960p/wWidth
-	echo 960 > streaming/h264/h/960p/wWidth
-	echo 40 > streaming/h264/h/960p/bLevelIDC
-	echo "333667\n" > streaming/h264/h/960p/dwFrameInterval
-
-	mkdir -p streaming/h264/h/1920p
-	echo "333667\n" > streaming/h264/h/1920p/dwFrameInterval
-
-	mkdir streaming/header/h
-	ln -s streaming/uncompressed/u streaming/header/h
-	ln -s streaming/mjpeg/m streaming/header/h
-	ln -s streaming/h264/h streaming/header/h
-	ln -s streaming/header/h streaming/class/fs/
-	ln -s streaming/header/h streaming/class/hs/
-	ln -s streaming/header/h streaming/class/ss/
+# Initialize UVC configuration.
+#
+UVC_DIR="/config/usb_gadget/g1/functions/uvc.0"
+if [ ! -d "${UVC_DIR}" ]; then
+	mkdir -p "${UVC_DIR}"
 fi
+
+if [ -d "${UVC_DIR}" ]; then
+	echo 3072 > "${UVC_DIR}/streaming_maxpacket"
+	echo 10 > "${UVC_DIR}/streaming_maxburst"
+
+	# Control header (default bcdUVC 0x0150 / UVC 1.50)
+	mkdir -p "${UVC_DIR}/control/header/h"
+	ln -s "${UVC_DIR}/control/header/h" "${UVC_DIR}/control/class/fs/h" 2>/dev/null || true
+	ln -s "${UVC_DIR}/control/header/h" "${UVC_DIR}/control/class/ss/h" 2>/dev/null || true
+
+	# Streaming uncompressed formats
+	mkdir -p "${UVC_DIR}/streaming/uncompressed/u/360p"
+	echo 640 > "${UVC_DIR}/streaming/uncompressed/u/360p/wWidth"
+	echo 360 > "${UVC_DIR}/streaming/uncompressed/u/360p/wHeight"
+	echo 18432000 > "${UVC_DIR}/streaming/uncompressed/u/360p/dwMinBitRate"
+	echo 55296000 > "${UVC_DIR}/streaming/uncompressed/u/360p/dwMaxBitRate"
+	echo 460800 > "${UVC_DIR}/streaming/uncompressed/u/360p/dwMaxVideoFrameBufferSize"
+	echo 333333 > "${UVC_DIR}/streaming/uncompressed/u/360p/dwDefaultFrameInterval"
+	printf '166666\n333333\n666666\n1000000\n5000000\n' > "${UVC_DIR}/streaming/uncompressed/u/360p/dwFrameInterval"
+
+	mkdir -p "${UVC_DIR}/streaming/uncompressed/u/720p"
+	echo 1280 > "${UVC_DIR}/streaming/uncompressed/u/720p/wWidth"
+	echo 720 > "${UVC_DIR}/streaming/uncompressed/u/720p/wHeight"
+	echo 29491200 > "${UVC_DIR}/streaming/uncompressed/u/720p/dwMinBitRate"
+	echo 29491200 > "${UVC_DIR}/streaming/uncompressed/u/720p/dwMaxBitRate"
+	echo 1843200 > "${UVC_DIR}/streaming/uncompressed/u/720p/dwMaxVideoFrameBufferSize"
+	echo 333333 > "${UVC_DIR}/streaming/uncompressed/u/720p/dwDefaultFrameInterval"
+	printf '166666\n333333\n666666\n1000000\n5000000\n' > "${UVC_DIR}/streaming/uncompressed/u/720p/dwFrameInterval"
+
+	# Streaming mjpeg formats
+	mkdir -p "${UVC_DIR}/streaming/mjpeg/m/360p"
+	echo 640 > "${UVC_DIR}/streaming/mjpeg/m/360p/wWidth"
+	echo 360 > "${UVC_DIR}/streaming/mjpeg/m/360p/wHeight"
+	echo 18432000 > "${UVC_DIR}/streaming/mjpeg/m/360p/dwMinBitRate"
+	echo 55296000 > "${UVC_DIR}/streaming/mjpeg/m/360p/dwMaxBitRate"
+	echo 460800 > "${UVC_DIR}/streaming/mjpeg/m/360p/dwMaxVideoFrameBufferSize"
+	echo 333333 > "${UVC_DIR}/streaming/mjpeg/m/360p/dwDefaultFrameInterval"
+	printf '166666\n333333\n666666\n1000000\n5000000\n' > "${UVC_DIR}/streaming/mjpeg/m/360p/dwFrameInterval"
+
+	mkdir -p "${UVC_DIR}/streaming/mjpeg/m/720p"
+	echo 1280 > "${UVC_DIR}/streaming/mjpeg/m/720p/wWidth"
+	echo 720 > "${UVC_DIR}/streaming/mjpeg/m/720p/wHeight"
+	echo 29491200 > "${UVC_DIR}/streaming/mjpeg/m/720p/dwMinBitRate"
+	echo 29491200 > "${UVC_DIR}/streaming/mjpeg/m/720p/dwMaxBitRate"
+	echo 1843200 > "${UVC_DIR}/streaming/mjpeg/m/720p/dwMaxVideoFrameBufferSize"
+	echo 333333 > "${UVC_DIR}/streaming/mjpeg/m/720p/dwDefaultFrameInterval"
+	printf '166666\n333333\n666666\n1000000\n5000000\n' > "${UVC_DIR}/streaming/mjpeg/m/720p/dwFrameInterval"
+
+	mkdir -p "${UVC_DIR}/streaming/mjpeg/m/1080p"
+	echo 1920 > "${UVC_DIR}/streaming/mjpeg/m/1080p/wWidth"
+	echo 1080 > "${UVC_DIR}/streaming/mjpeg/m/1080p/wHeight"
+	echo 66355200 > "${UVC_DIR}/streaming/mjpeg/m/1080p/dwMinBitRate"
+	echo 995328000 > "${UVC_DIR}/streaming/mjpeg/m/1080p/dwMaxBitRate"
+	echo 4147200 > "${UVC_DIR}/streaming/mjpeg/m/1080p/dwMaxVideoFrameBufferSize"
+	echo 333333 > "${UVC_DIR}/streaming/mjpeg/m/1080p/dwDefaultFrameInterval"
+	printf '166666\n333333\n666666\n1000000\n5000000\n' > "${UVC_DIR}/streaming/mjpeg/m/1080p/dwFrameInterval"
+
+	echo 0x04 > "${UVC_DIR}/streaming/mjpeg/m/bmaControls"
+
+	# Streaming header & class links
+	mkdir -p "${UVC_DIR}/streaming/header/h"
+	ln -s "${UVC_DIR}/streaming/uncompressed/u" "${UVC_DIR}/streaming/header/h/u" 2>/dev/null || true
+	ln -s "${UVC_DIR}/streaming/mjpeg/m" "${UVC_DIR}/streaming/header/h/m" 2>/dev/null || true
+	ln -s "${UVC_DIR}/streaming/header/h" "${UVC_DIR}/streaming/class/fs/h" 2>/dev/null || true
+	ln -s "${UVC_DIR}/streaming/header/h" "${UVC_DIR}/streaming/class/hs/h" 2>/dev/null || true
+	ln -s "${UVC_DIR}/streaming/header/h" "${UVC_DIR}/streaming/class/ss/h" 2>/dev/null || true
+
+	# Ownership and permissions for HAL
+	chown -R system:usb "${UVC_DIR}" 2>/dev/null || chown -R 1000:1014 "${UVC_DIR}" 2>/dev/null
+	chmod -R 0770 "${UVC_DIR}"
+fi
+
+if [ -d /config/usb_gadget/g1/functions/uac2.0 ]; then
+	setprop vendor.usb.uac2.function.init 1
+fi
+
