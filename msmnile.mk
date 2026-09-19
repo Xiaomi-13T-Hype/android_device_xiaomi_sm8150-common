@@ -154,7 +154,12 @@ endif
 # Device-specific settings
 PRODUCT_PACKAGES += \
     XiaomiParts \
-    XiaomiDolby
+    DolbyAtmos
+
+# Dolby Atmos permissions & configuration
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/DolbyAtmos/privapp-permissions-dolby.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-dolby.xml \
+    $(LOCAL_PATH)/DolbyAtmos/preinstalled-packages-platform-dolby.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/sysconfig/preinstalled-packages-platform-dolby.xml
 
 
 # Display
