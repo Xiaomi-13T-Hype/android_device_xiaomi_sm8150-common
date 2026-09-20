@@ -12,37 +12,78 @@ import subprocess
 import struct
 import re
 
-def generate_boot_675(boot_src_path, boot_dst_path, top_dir=None):
-    if top_dir is None:
-        top_dir = os.environ.get("ANDROID_BUILD_TOP", os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../")))
+def find_top_dir(top_dir=None):
+    if top_dir and os.path.isdir(os.path.join(top_dir, "device", "xiaomi", "sm8150-common")):
+        return top_dir
 
-    dtc = os.path.join(top_dir, "prebuilts/kernel-build-tools/linux-x86/bin/dtc")
-    mkbootimg = os.path.join(top_dir, "system/tools/mkbootimg/mkbootimg.py")
-    unpack_bootimg = os.path.join(top_dir, "system/tools/mkbootimg/unpack_bootimg.py")
+    env_top = os.environ.get("ANDROID_BUILD_TOP")
+    if env_top and os.path.isdir(os.path.join(env_top, "device", "xiaomi", "sm8150-common")):
+        return env_top
+
+    cwd = os.getcwd()
+    if os.path.isdir(os.path.join(cwd, "device", "xiaomi", "sm8150-common")):
+        return cwd
+
+    script_top = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+    if os.path.isdir(os.path.join(script_top, "device", "xiaomi", "sm8150-common")):
+        return script_top
+
+    if os.path.isdir("/home/Ximi/Poco-X3-Pro-Lunaris-AOSP"):
+        return "/home/Ximi/Poco-X3-Pro-Lunaris-AOSP"
+
+    return None
+
+def generate_boot_675(boot_src_path, boot_dst_path, top_dir=None):
+    top = find_top_dir(top_dir)
+    if not top:
+        raise RuntimeError("Could not determine Android build top directory")
+
+    dtc = os.path.join(top, "prebuilts/kernel-build-tools/linux-x86/bin/dtc")
+    if not os.path.exists(dtc):
+        dtc = shutil.which("dtc")
+    if not dtc or not os.path.exists(dtc):
+        raise RuntimeError("dtc binary not found")
+
+    mkbootimg = os.path.join(top, "system/tools/mkbootimg/mkbootimg.py")
+    unpack_bootimg = os.path.join(top, "system/tools/mkbootimg/unpack_bootimg.py")
+
+    if not os.path.exists(mkbootimg) or not os.path.exists(unpack_bootimg):
+        raise RuntimeError("mkbootimg/unpack_bootimg tools not found in system/tools/mkbootimg")
 
     tmpdir = tempfile.mkdtemp(prefix="boot_675_")
     try:
-        # 1. Unpack boot image
-        subprocess.run(["python3", unpack_bootimg, "--boot_img", boot_src_path, "--out", tmpdir], check=True, stdout=subprocess.DEVNULL)
+        # 1. Unpack boot image with mkbootimg argument extraction (-0)
+        raw_args = subprocess.check_output(
+            ["python3", unpack_bootimg, "--boot_img", boot_src_path, "--out", tmpdir, "--format", "mkbootimg", "-0"]
+        )
+        unpacked_args = raw_args.decode("utf-8").split("\0")
+        if unpacked_args and unpacked_args[-1] == "":
+            unpacked_args.pop()
 
         # 2. Extract and split DTBs
-        with open(os.path.join(tmpdir, "dtb"), "rb") as f:
+        dtb_file = os.path.join(tmpdir, "dtb")
+        if not os.path.exists(dtb_file):
+            raise RuntimeError("No DTB found in unpacked boot image")
+
+        with open(dtb_file, "rb") as f:
             dtb_data = f.read()
 
         pos = 0
         blobs = []
         while pos < len(dtb_data):
+            if pos + 8 > len(dtb_data):
+                break
             magic, size = struct.unpack(">II", dtb_data[pos:pos+8])
             if magic != 0xd00dfeed:
                 break
             blobs.append(dtb_data[pos:pos+size])
             pos += size
 
-        # 3. Patch sm8150-v2 and sm8150p-v2 blobs (indices 1 and 3)
+        # 3. Patch blobs containing 692MHz GPU opp table
         patched_blobs = []
         for i, blob in enumerate(blobs):
-            if i in (1, 3):
-                dts = subprocess.check_output([dtc, "-I", "dtb", "-O", "dts"], input=blob, stderr=subprocess.DEVNULL).decode("utf-8")
+            dts = subprocess.check_output([dtc, "-I", "dtb", "-O", "dts"], input=blob, stderr=subprocess.DEVNULL).decode("utf-8")
+            if "692000000" in dts or "<0x293f1500>" in dts:
                 # Remove opp-692000000 node
                 dts = re.sub(r'\t+opp-692000000\s*\{[^}]*\};\n?', '', dts)
                 # Replace 692MHz with 675MHz in any gpu-freq property
@@ -57,24 +98,22 @@ def generate_boot_675(boot_src_path, boot_dst_path, top_dir=None):
             for b in patched_blobs:
                 f.write(b)
 
-        # 4. Pack boot_675.img
-        cmd = [
-            "python3", mkbootimg,
-            "--kernel", os.path.join(tmpdir, "kernel"),
-            "--ramdisk", os.path.join(tmpdir, "ramdisk"),
-            "--dtb", dtb_out,
-            "--cmdline", "androidboot.hardware=qcom androidboot.console=ttyMSM0 androidboot.memcg=1 lpm_levels.sleep_disabled=1 msm_rtb.filter=0x237 service_locator.enable=1 swiotlb=2048 loop.max_part=7 androidboot.usbcontroller=a600000.dwc3 androidboot.fstab_suffix=qcom androidboot.init_fatal_reboot_target=recovery",
-            "--base", "0x00000000",
-            "--pagesize", "4096",
-            "--kernel_offset", "0x00008000",
-            "--ramdisk_offset", "0x01000000",
-            "--tags_offset", "0x00000100",
-            "--dtb_offset", "0x01f00000",
-            "--os_version", "16.0.0",
-            "--os_patch_level", "2026-09",
-            "--header_version", "2",
-            "--output", boot_dst_path
-        ]
+        # 4. Filter unpacked args and substitute --dtb with patched dtb
+        repack_args = []
+        skip_next = False
+        for arg in unpacked_args:
+            if skip_next:
+                skip_next = False
+                continue
+            if arg == "--dtb":
+                repack_args.extend(["--dtb", dtb_out])
+                skip_next = True
+            elif arg == "--output":
+                skip_next = True
+            else:
+                repack_args.append(arg)
+
+        cmd = ["python3", mkbootimg] + repack_args + ["--output", boot_dst_path]
         subprocess.run(cmd, check=True)
 
         # Pad to 134217728 bytes (128MB) to match partition size
@@ -89,6 +128,7 @@ def generate_boot_675(boot_src_path, boot_dst_path, top_dir=None):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: generate_boot_675.py <input_boot.img> <output_boot_675.img>")
+        print("Usage: generate_boot_675.py <input_boot.img> <output_boot_675.img> [top_dir]")
         sys.exit(1)
-    generate_boot_675(sys.argv[1], sys.argv[2])
+    top_arg = sys.argv[3] if len(sys.argv) > 3 else None
+    generate_boot_675(sys.argv[1], sys.argv[2], top_dir=top_arg)

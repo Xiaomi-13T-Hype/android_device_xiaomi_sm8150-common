@@ -109,21 +109,21 @@ wait_key_selection() {
 
 ui_print " "
 ui_print "==============================================="
+ui_print "       Installing step: 1/2"
 ui_print "       Lunaris AOSP Display & GPU Selector"
-ui_print "       Install step: 1/2"
 ui_print "==============================================="
 ui_print " "
 
 # Step 1: Display Refresh Rate
 ui_print "[1/2] Display Refresh Rate:"
-ui_print "  [VOL +] Stock 120Hz (Recommended)"
-ui_print "  [VOL -] Overclock 130Hz (Smooth mode)"
-ui_print "  (Timeout 10s -> Stock 120Hz)"
+ui_print "  [VOLUME +] Stock 120Hz"
+ui_print "  [VOLUME -] Overclocked 130Hz "
+ui_print "  (Timeout 10 sec -> Stock 120Hz)"
 
 DISP_CHOICE=$(wait_key_selection "120" "120" "130")
 
 if [ "$DISP_CHOICE" = "130" ]; then
-    ui_print ">> Selected: [Overclock 130Hz]"
+    ui_print ">> Selected: [Overcloked 130Hz ]"
 else
     ui_print ">> Selected: [Stock 120Hz]"
     DISP_CHOICE="120"
@@ -132,17 +132,17 @@ fi
 ui_print " "
 
 # Step 2: GPU Clock
-ui_print "[2/2] Adreno 640 GPU Max Clock:"
-ui_print "  [VOL +] Stock 675MHz (Cool / Stable)"
-ui_print "  [VOL -] Overclock 692MHz (Max FPS)"
-ui_print "  (Timeout 10s -> Stock 675MHz)"
+ui_print "[2/2] Max GPU Frequency:"
+ui_print "  [VOLUME +] Stock GPU (675MHz)"
+ui_print "  [VOLUME -] Overcloked GPU (692MHz)"
+ui_print "  (Timeout 10 sec -> Stock GPU (675MHz)"
 
 GPU_CHOICE=$(wait_key_selection "675" "675" "692")
 
 if [ "$GPU_CHOICE" = "692" ]; then
-    ui_print ">> Selected: [Overclock 692MHz]"
+    ui_print ">> Selected: [Overcloked GPU (692MHz)]"
 else
-    ui_print ">> Selected: [Stock 675MHz]"
+    ui_print ">> Selected: [Stock GPU (675MHz)]"
     GPU_CHOICE="675"
 fi
 
@@ -151,7 +151,7 @@ ui_print "==============================================="
 ui_print " Config saved:"
 ui_print "  - Display : ${DISP_CHOICE} Hz"
 ui_print "  - GPU     : ${GPU_CHOICE} MHz"
-ui_print " Starting installation..."
+ui_print " Starting installation step 2/2..."
 ui_print "==============================================="
 ui_print " "
 

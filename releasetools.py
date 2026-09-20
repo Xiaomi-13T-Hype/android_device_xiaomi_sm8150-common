@@ -17,17 +17,23 @@
 import os
 import sys
 import tempfile
+import importlib.util
 import common
 
 LUNARIS_CONFIG_SCRIPT = r"""#!/sbin/sh
+#
 # Lunaris AOSP Hardware Frequency Selector for Poco X3 Pro (vayu)
-CHOICE_PROP="/tmp/lunaris_choice.prop"
-FIFO="/tmp/lunaris_ev_fifo"
+# Runs during recovery installation to configure Display (120/130Hz) and GPU (675/692MHz).
+#
 
+CHOICE_PROP="/tmp/lunaris_choice.prop"
+
+# Pre-populate default properties immediately so file_getprop never encounters a missing file
 mkdir -p "$(dirname "$CHOICE_PROP")"
 echo "display_hz=120" > "$CHOICE_PROP"
 echo "gpu_clock=675" >> "$CHOICE_PROP"
 
+# Auto-detect Recovery command pipe for ui_print
 OUTFD=
 if [ -r "/proc/$PPID/cmdline" ]; then
     PARENT_FD=$(tr '\0' '\n' < "/proc/$PPID/cmdline" 2>/dev/null | sed -n '3p')
@@ -50,10 +56,25 @@ if [ -z "$OUTFD" ]; then
     done
 fi
 
+if [ -z "$OUTFD" ] && [ -n "$PPID" ] && [ -d "/proc/$PPID/fd" ]; then
+    for fd in 3 4 5 6 7 8; do
+        if [ -e "/proc/$PPID/fd/$fd" ]; then
+            link=$(readlink "/proc/$PPID/fd/$fd" 2>/dev/null)
+            case "$link" in
+                pipe:*)
+                    OUTFD="/proc/$PPID/fd/$fd"
+                    break
+                    ;;
+            esac
+        fi
+    done
+fi
+
 ui_print() {
     if [ -n "$OUTFD" ]; then
         echo "ui_print $1" > "$OUTFD" 2>/dev/null
     fi
+    # Also log to stdout for recovery.log
     echo "$1"
 }
 
@@ -67,6 +88,7 @@ wait_key_selection() {
 
     rm -f "$key_file"
 
+    # Start background key event listener
     (
         getevent -l 2>/dev/null | while read -r line; do
             case "$line" in
@@ -105,22 +127,25 @@ wait_key_selection() {
     echo "$choice"
 }
 
+# --- Main Selector Interface ---
+
 ui_print " "
 ui_print "==============================================="
+ui_print "       Installing step: 1/2"
 ui_print "       Lunaris AOSP Display & GPU Selector"
-ui_print "       Install step: 1/2"
 ui_print "==============================================="
 ui_print " "
 
+# Step 1: Display Refresh Rate
 ui_print "[1/2] Display Refresh Rate:"
-ui_print "  [VOL +] Stock 120Hz (Recommended)"
-ui_print "  [VOL -] Overclock 130Hz (Smooth mode)"
-ui_print "  (Timeout 10s -> Stock 120Hz)"
+ui_print "  [VOLUME +] Stock 120Hz"
+ui_print "  [VOLUME -] Overclocked 130Hz "
+ui_print "  (Timeout 10 sec -> Stock 120Hz)"
 
 DISP_CHOICE=$(wait_key_selection "120" "120" "130")
 
 if [ "$DISP_CHOICE" = "130" ]; then
-    ui_print ">> Selected: [Overclock 130Hz]"
+    ui_print ">> Selected: [Overcloked 130Hz ]"
 else
     ui_print ">> Selected: [Stock 120Hz]"
     DISP_CHOICE="120"
@@ -128,17 +153,18 @@ fi
 
 ui_print " "
 
-ui_print "[2/2] Adreno 640 GPU Max Clock:"
-ui_print "  [VOL +] Stock 675MHz (Cool / Stable)"
-ui_print "  [VOL -] Overclock 692MHz (Max FPS)"
-ui_print "  (Timeout 10s -> Stock 675MHz)"
+# Step 2: GPU Clock
+ui_print "[2/2] Max GPU Frequency:"
+ui_print "  [VOLUME +] Stock GPU (675MHz)"
+ui_print "  [VOLUME -] Overcloked GPU (692MHz)"
+ui_print "  (Timeout 10 sec -> Stock GPU (675MHz)"
 
 GPU_CHOICE=$(wait_key_selection "675" "675" "692")
 
 if [ "$GPU_CHOICE" = "692" ]; then
-    ui_print ">> Selected: [Overclock 692MHz]"
+    ui_print ">> Selected: [Overcloked GPU (692MHz)]"
 else
-    ui_print ">> Selected: [Stock 675MHz]"
+    ui_print ">> Selected: [Stock GPU (675MHz)]"
     GPU_CHOICE="675"
 fi
 
@@ -147,10 +173,11 @@ ui_print "==============================================="
 ui_print " Config saved:"
 ui_print "  - Display : ${DISP_CHOICE} Hz"
 ui_print "  - GPU     : ${GPU_CHOICE} MHz"
-ui_print " Starting installation..."
+ui_print " Starting installation step 2/2..."
 ui_print "==============================================="
 ui_print " "
 
+# Save finalized properties to /tmp/lunaris_choice.prop
 echo "display_hz=${DISP_CHOICE}" > "$CHOICE_PROP"
 echo "gpu_clock=${GPU_CHOICE}" >> "$CHOICE_PROP"
 
@@ -169,7 +196,7 @@ def GetTopDir(info=None):
   if info and hasattr(info, "info_dict") and info.info_dict:
     tool_ext = info.info_dict.get("tool_extensions")
     if tool_ext:
-      cand = os.path.abspath(os.path.join(tool_ext, "..", "..", ".."))
+      cand = os.path.abspath(os.path.join(cwd, tool_ext, "..", "..", ".."))
       if os.path.isdir(os.path.join(cand, "device", "xiaomi", "sm8150-common")):
         return cand
 
@@ -208,7 +235,7 @@ def AddImage(info, basename, dest):
   info.script.AppendExtra('package_extract_file("%s", "%s");' % (basename, dest))
 
 def AddFileToZip(info, src_path, dest_name):
-  if os.path.exists(src_path):
+  if src_path and os.path.exists(src_path):
     common.ZipWrite(info.output_zip, src_path, arcname=dest_name)
     return True
   return False
@@ -245,12 +272,13 @@ def OTA_InstallEnd(info):
 
   dtbo_120 = os.path.join(vayu_prebuilt, "dtbo_120.img") if vayu_prebuilt else None
   dtbo_130 = os.path.join(vayu_prebuilt, "dtbo_130.img") if vayu_prebuilt else None
-  boot_675 = os.path.join(vayu_prebuilt, "boot_675.img") if vayu_prebuilt else None
+  boot_675_prebuilt = os.path.join(vayu_prebuilt, "boot_675.img") if vayu_prebuilt else None
 
   has_vayu_selector = dtbo_120 and dtbo_130 and os.path.exists(dtbo_120) and os.path.exists(dtbo_130)
 
   if has_vayu_selector:
     # 1. Package both DTBO options
+    print("Lunaris AOSP: Packaging 120Hz and 130Hz DTBO images into OTA package...")
     AddFileToZip(info, dtbo_120, "dtbo_120.img")
     AddFileToZip(info, dtbo_130, "dtbo_130.img")
 
@@ -260,25 +288,30 @@ def OTA_InstallEnd(info):
     # Attempt dynamic generation from current build's IMAGES/boot.img
     if "IMAGES/boot.img" in info.input_zip.namelist() and top_dir:
       try:
-        installer_dir = os.path.join(top_dir, "device", "xiaomi", "sm8150-common", "installer")
-        if installer_dir not in sys.path:
-          sys.path.insert(0, installer_dir)
-        import generate_boot_675
-        with tempfile.TemporaryDirectory(prefix="ota_boot_") as tmp_ota:
-          src_boot = os.path.join(tmp_ota, "boot.img")
-          dst_boot = os.path.join(tmp_ota, "boot_675.img")
-          with open(src_boot, "wb") as f:
-            f.write(info.input_zip.read("IMAGES/boot.img"))
-          generate_boot_675.generate_boot_675(src_boot, dst_boot, top_dir=top_dir)
-          if os.path.exists(dst_boot) and os.path.getsize(dst_boot) > 0:
-            AddFileToZip(info, dst_boot, "boot_675.img")
-            has_boot_675 = True
+        mod_path = os.path.join(top_dir, "device", "xiaomi", "sm8150-common", "installer", "generate_boot_675.py")
+        if os.path.exists(mod_path):
+          print("Lunaris AOSP: Generating dynamic 675MHz GPU boot image from IMAGES/boot.img...")
+          spec = importlib.util.spec_from_file_location("generate_boot_675", mod_path)
+          gen_mod = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(gen_mod)
+
+          with tempfile.TemporaryDirectory(prefix="ota_boot_") as tmp_ota:
+            src_boot = os.path.join(tmp_ota, "boot.img")
+            dst_boot = os.path.join(tmp_ota, "boot_675.img")
+            with open(src_boot, "wb") as f:
+              f.write(info.input_zip.read("IMAGES/boot.img"))
+            gen_mod.generate_boot_675(src_boot, dst_boot, top_dir=top_dir)
+            if os.path.exists(dst_boot) and os.path.getsize(dst_boot) > 0:
+              AddFileToZip(info, dst_boot, "boot_675.img")
+              has_boot_675 = True
+              print("Lunaris AOSP: Successfully generated and added dynamic boot_675.img")
       except Exception as e:
         print("Notice: Dynamic boot_675 generation skipped: %s" % e)
 
     # Fallback to prebuilt boot_675.img
-    if not has_boot_675 and boot_675 and os.path.exists(boot_675):
-      AddFileToZip(info, boot_675, "boot_675.img")
+    if not has_boot_675 and boot_675_prebuilt and os.path.exists(boot_675_prebuilt):
+      print("Lunaris AOSP: Using prebuilt boot_675.img fallback...")
+      AddFileToZip(info, boot_675_prebuilt, "boot_675.img")
       has_boot_675 = True
 
     # 3. Flashing DTBO based on user choice in Recovery
