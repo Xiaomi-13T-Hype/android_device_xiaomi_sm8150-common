@@ -78,25 +78,27 @@ ui_print() {
     echo "$1"
 }
 
+KEY_CHOICE=""
+
 wait_key_selection() {
     local default_val="$1"
     local opt_plus="$2"
     local opt_minus="$3"
     local timeout_sec=10
-    local choice="$default_val"
     local key_file="/tmp/lunaris_key"
 
     rm -f "$key_file"
+    KEY_CHOICE="$default_val"
 
     # Start background key event listener
     (
         getevent -l 2>/dev/null | while read -r line; do
             case "$line" in
-                *KEY_VOLUMEUP*DOWN*|*0073*00000001*|*0073*1*)
+                *KEY_VOLUMEUP*DOWN*|*KEY_VOLUMEUP*down*|*0073*00000001*|*0073*1*)
                     echo "$opt_plus" > "$key_file"
                     exit 0
                     ;;
-                *KEY_VOLUMEDOWN*DOWN*|*0072*00000001*|*0072*1*)
+                *KEY_VOLUMEDOWN*DOWN*|*KEY_VOLUMEDOWN*down*|*0072*00000001*|*0072*1*)
                     echo "$opt_minus" > "$key_file"
                     exit 0
                     ;;
@@ -108,23 +110,20 @@ wait_key_selection() {
     local elapsed=0
     while [ $elapsed -lt $timeout_sec ]; do
         if [ -s "$key_file" ]; then
-            choice=$(cat "$key_file")
+            KEY_CHOICE=$(tr -d ' \t\r\n' < "$key_file")
             break
         fi
         sleep 1
         elapsed=$((elapsed + 1))
         local remaining=$((timeout_sec - elapsed))
         if [ $remaining -gt 0 ] && [ $((remaining % 3)) -eq 0 ]; then
-            ui_print "  ... remaining: $remaining s"
+            ui_print "  ... remaining: ${remaining}s"
         fi
     done
 
     kill -9 $listener_pid 2>/dev/null
     killall getevent 2>/dev/null
     rm -f "$key_file"
-    sleep 1
-
-    echo "$choice"
 }
 
 # --- Main Selector Interface ---
@@ -139,13 +138,14 @@ ui_print " "
 # Step 1: Display Refresh Rate
 ui_print "[1/2] Display Refresh Rate:"
 ui_print "  [VOLUME +] Stock 120Hz"
-ui_print "  [VOLUME -] Overclocked 130Hz "
+ui_print "  [VOLUME -] Overclocked 130Hz"
 ui_print "  (Timeout 10 sec -> Stock 120Hz)"
 
-DISP_CHOICE=$(wait_key_selection "120" "120" "130")
+wait_key_selection "120" "120" "130"
+DISP_CHOICE="$KEY_CHOICE"
 
 if [ "$DISP_CHOICE" = "130" ]; then
-    ui_print ">> Selected: [Overcloked 130Hz ]"
+    ui_print ">> Selected: [Overclocked 130Hz]"
 else
     ui_print ">> Selected: [Stock 120Hz]"
     DISP_CHOICE="120"
@@ -156,13 +156,14 @@ ui_print " "
 # Step 2: GPU Clock
 ui_print "[2/2] Max GPU Frequency:"
 ui_print "  [VOLUME +] Stock GPU (675MHz)"
-ui_print "  [VOLUME -] Overcloked GPU (692MHz)"
-ui_print "  (Timeout 10 sec -> Stock GPU (675MHz)"
+ui_print "  [VOLUME -] Overclocked GPU (692MHz)"
+ui_print "  (Timeout 10 sec -> Stock GPU (675MHz))"
 
-GPU_CHOICE=$(wait_key_selection "675" "675" "692")
+wait_key_selection "675" "675" "692"
+GPU_CHOICE="$KEY_CHOICE"
 
 if [ "$GPU_CHOICE" = "692" ]; then
-    ui_print ">> Selected: [Overcloked GPU (692MHz)]"
+    ui_print ">> Selected: [Overclocked GPU (692MHz)]"
 else
     ui_print ">> Selected: [Stock GPU (675MHz)]"
     GPU_CHOICE="675"
