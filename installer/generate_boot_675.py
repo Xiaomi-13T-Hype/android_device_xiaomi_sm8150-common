@@ -84,9 +84,9 @@ def generate_boot_675(boot_src_path, boot_dst_path, top_dir=None):
         for i, blob in enumerate(blobs):
             dts = subprocess.check_output([dtc, "-I", "dtb", "-O", "dts"], input=blob, stderr=subprocess.DEVNULL).decode("utf-8")
             if "692000000" in dts or "<0x293f1500>" in dts:
-                # Remove opp-692000000 node
-                dts = re.sub(r'\t+opp-692000000\s*\{[^}]*\};\n?', '', dts)
-                # Replace 692MHz with 675MHz in any gpu-freq property
+                # Transform 692MHz OPP and frequency to 675MHz maintaining 7-level GMU table
+                dts = dts.replace("opp-692000000", "opp-675000000")
+                dts = dts.replace("692000000", "675000000")
                 dts = dts.replace("<0x293f1500>", "<0x283baec0>")
                 recompiled = subprocess.check_output([dtc, "-I", "dts", "-O", "dtb"], input=dts.encode("utf-8"), stderr=subprocess.DEVNULL)
                 patched_blobs.append(recompiled)
