@@ -7,6 +7,11 @@
 CHOICE_PROP="/tmp/lunaris_choice.prop"
 FIFO="/tmp/lunaris_ev_fifo"
 
+# Pre-populate default properties immediately so file_getprop never encounters a missing file
+mkdir -p "$(dirname "$CHOICE_PROP")"
+echo "display_hz=120" > "$CHOICE_PROP"
+echo "gpu_clock=675" >> "$CHOICE_PROP"
+
 # Detect Recovery command pipe (status_fd passed to update_binary)
 OUTFD=
 if [ -r "/proc/$PPID/cmdline" ]; then
@@ -34,7 +39,6 @@ fi
 ui_print() {
     if [ -n "$OUTFD" ]; then
         echo "ui_print $1" > "$OUTFD" 2>/dev/null
-        echo "ui_print" > "$OUTFD" 2>/dev/null
     fi
     # Also log to stdout for recovery.log
     echo "$1"
@@ -74,7 +78,7 @@ wait_key_selection() {
             elapsed=$((elapsed + 1))
             local remaining=$((timeout_sec - elapsed))
             if [ $remaining -gt 0 ] && [ $((remaining % 3)) -eq 0 ]; then
-                ui_print "  ... осталось $remaining сек"
+                ui_print "  ... $remaining sec remaining"
             fi
         fi
     done
@@ -100,48 +104,47 @@ ui_print "==============================================="
 ui_print " "
 
 # Step 1: Display Refresh Rate
-ui_print "[1/2] Частота обновления экрана:"
-ui_print "  [ГРОМКОСТЬ +] Сток 120 Гц (Рекомендуется)"
-ui_print "  [ГРОМКОСТЬ -] Разгон 130 Гц (Плавный режим)"
-ui_print "  (Таймаут 10 сек -> Сток 120 Гц)"
+ui_print "[1/2] Display Refresh Rate:"
+ui_print "  [VOL +] Stock 120Hz (Recommended)"
+ui_print "  [VOL -] Overclock 130Hz (Smooth mode)"
+ui_print "  (Timeout 10s -> Stock 120Hz)"
 
 DISP_CHOICE=$(wait_key_selection "120" "120" "130")
 
 if [ "$DISP_CHOICE" = "130" ]; then
-    ui_print ">> ВЫБРАНО: [Разгон 130 Гц]"
+    ui_print ">> SELECTED: [Overclock 130Hz]"
 else
-    ui_print ">> ВЫБРАНО: [Сток 120 Гц]"
+    ui_print ">> SELECTED: [Stock 120Hz]"
     DISP_CHOICE="120"
 fi
 
 ui_print " "
 
 # Step 2: GPU Clock
-ui_print "[2/2] Максимальная частота GPU Adreno 640:"
-ui_print "  [ГРОМКОСТЬ +] Сток 675 МГц (Холодный / Стабильный)"
-ui_print "  [ГРОМКОСТЬ -] Разгон 692 МГц (Макс. FPS)"
-ui_print "  (Таймаут 10 сек -> Сток 675 МГц)"
+ui_print "[2/2] Adreno 640 GPU Max Clock:"
+ui_print "  [VOL +] Stock 675MHz (Cool / Stable)"
+ui_print "  [VOL -] Overclock 692MHz (Max FPS)"
+ui_print "  (Timeout 10s -> Stock 675MHz)"
 
 GPU_CHOICE=$(wait_key_selection "675" "675" "692")
 
 if [ "$GPU_CHOICE" = "692" ]; then
-    ui_print ">> ВЫБРАНО: [Разгон 692 МГц]"
+    ui_print ">> SELECTED: [Overclock 692MHz]"
 else
-    ui_print ">> ВЫБРАНО: [Сток 675 МГц]"
+    ui_print ">> SELECTED: [Stock 675MHz]"
     GPU_CHOICE="675"
 fi
 
 ui_print " "
 ui_print "==============================================="
-ui_print " КОНФИГУРАЦИЯ СОХРАНЕНА:"
-ui_print "  - Экран : ${DISP_CHOICE} Гц"
-ui_print "  - GPU   : ${GPU_CHOICE} МГц"
-ui_print " Приступаем к распаковке и установке..."
+ui_print " CONFIGURATION SAVED:"
+ui_print "  - Display : ${DISP_CHOICE} Hz"
+ui_print "  - GPU     : ${GPU_CHOICE} MHz"
+ui_print " Starting ROM installation..."
 ui_print "==============================================="
 ui_print " "
 
-# Save properties to /tmp/lunaris_choice.prop
-mkdir -p "$(dirname "$CHOICE_PROP")"
+# Save finalized properties to /tmp/lunaris_choice.prop
 echo "display_hz=${DISP_CHOICE}" > "$CHOICE_PROP"
 echo "gpu_clock=${GPU_CHOICE}" >> "$CHOICE_PROP"
 
