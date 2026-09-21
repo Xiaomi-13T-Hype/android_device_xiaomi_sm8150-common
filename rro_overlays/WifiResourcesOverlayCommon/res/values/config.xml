@@ -35,9 +35,9 @@
     <string name="config_wifi_tcp_buffers" translatable="false">524288,1048576,5505024,262144,524288,5505024</string>
 
     <!-- Channel list for softap 2G band. Empty means all channels -->
-    <string translateble="false" name="config_wifiSoftap2gChannelList"></string>
+    <string translatable="false" name="config_wifiSoftap2gChannelList">1,6,11</string>
     <!-- Channel list for softap 5G band. Empty means all channels -->
-    <string translateble="false" name="config_wifiSoftap5gChannelList"></string>
+    <string translatable="false" name="config_wifiSoftap5gChannelList">36,40,44,48,149,153,157,161</string>
 
     <!-- True if the firmware supports p2p MAC randomization -->
     <bool name="config_wifi_p2p_mac_randomization_supported">true</bool>
@@ -64,10 +64,10 @@
     <bool translatable="false" name="config_wifiSaeUpgradeEnabled">false</bool>
 
     <!-- Wifi driver supports WPA3 Simultaneous Authentication of Equals (WPA3-SAE) for softap -->
-    <bool name="config_wifi_softap_sae_supported">true</bool>
+    <bool name="config_wifi_softap_sae_supported">false</bool>
 
     <!-- Wifi driver Automatic channel selection (ACS) for softap to include DFS channels -->
-    <bool translatable="false" name="config_wifiSoftapAcsIncludeDfs">true</bool>
+    <bool translatable="false" name="config_wifiSoftapAcsIncludeDfs">false</bool>
 
     <!-- Integer indicating maximum hardware supported client number of soft ap -->
     <integer translatable="false" name="config_wifiHardwareSoftapMaxClientCount">32</integer>
