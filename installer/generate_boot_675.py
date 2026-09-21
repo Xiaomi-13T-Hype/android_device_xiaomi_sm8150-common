@@ -87,7 +87,13 @@ def generate_boot_675(boot_src_path, boot_dst_path, top_dir=None):
                 # Transform 692MHz OPP and frequency to 675MHz maintaining 7-level GMU table
                 dts = dts.replace("opp-692000000", "opp-675000000")
                 dts = dts.replace("692000000", "675000000")
-                dts = dts.replace("<0x293f1500>", "<0x283baec0>")
+                # Replace hex freq in both single-cell (gpu-freq) and two-cell (opp-hz) formats
+                dts = dts.replace("0x293f1500", "0x283baec0")
+                # Restore voltage from TURBO (0x181) to NOM_L1 (0x141) for stock 675MHz
+                dts = re.sub(
+                    r'(opp-675000000\s*\{[^}]*opp-microvolt\s*=\s*)<0x181>',
+                    r'\g<1><0x141>',
+                    dts, count=1)
                 recompiled = subprocess.check_output([dtc, "-I", "dts", "-O", "dtb"], input=dts.encode("utf-8"), stderr=subprocess.DEVNULL)
                 patched_blobs.append(recompiled)
             else:
