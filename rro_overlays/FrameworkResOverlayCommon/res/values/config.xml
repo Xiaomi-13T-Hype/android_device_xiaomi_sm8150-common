@@ -245,4 +245,7 @@
 
     <!-- Wallpaper will get top app scheduling priority if this is set to true. -->
     <bool name="config_wallpaperTopApp">true</bool>
+
+    <!-- Whether to enable usb state update via udc sysfs. -->
+    <bool name="config_enableUdcSysfsUsbStateUpdate">true</bool>
 </resources>
