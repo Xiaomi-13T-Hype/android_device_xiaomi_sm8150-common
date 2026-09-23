@@ -211,6 +211,8 @@ vendor.gralloc.disable_ubwc=0
 
 # Media
 debug.stagefright.c2inputsurface=-1
+persist.log.tag.QC2Buf=W
+persist.log.tag.QC2V4l2Codec=E
 ro.odm.build.media_performance_class=30
 vendor.media.omx=0
 
