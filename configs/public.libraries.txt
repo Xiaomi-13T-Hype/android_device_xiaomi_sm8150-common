@@ -29,3 +29,4 @@ libhta_hexagon_runtime.so
 unnhal-acc-hta.so
 libalhLDC.so
 libalAILDC.so
+libgrallocutils.so 64
