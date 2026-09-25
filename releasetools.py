@@ -130,7 +130,6 @@ wait_key_selection() {
 
 ui_print " "
 ui_print "==============================================="
-ui_print "       Installing step: 1/2"
 ui_print "       Lunaris AOSP Display & GPU Selector"
 ui_print "==============================================="
 ui_print " "
@@ -174,7 +173,7 @@ ui_print "==============================================="
 ui_print " Config saved:"
 ui_print "  - Display : ${DISP_CHOICE} Hz"
 ui_print "  - GPU     : ${GPU_CHOICE} MHz"
-ui_print " Starting installation step 2/2..."
+ui_print " Starting next step installation..."
 ui_print "==============================================="
 ui_print " "
 
