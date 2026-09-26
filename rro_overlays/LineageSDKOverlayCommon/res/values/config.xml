@@ -54,4 +54,16 @@
         <item>restart_bootloader</item>
         <item>restart_fastboot</item>
      </string-array>
+
+    <!-- Whether charging control should be enabled by default -->
+    <bool name="config_chargingControlEnabled">true</bool>
+
+    <!-- Default charging control mode: 3 = limit (Just limit charging) -->
+    <integer name="config_defaultChargingControlMode">3</integer>
+
+    <!-- Default charging limit: 101 (Always to 100% / No limit) -->
+    <integer name="config_defaultChargingControlLimit">101</integer>
+
+    <!-- Recharge margin: start charging again if battery drops by 2% below limit -->
+    <integer name="config_chargingControlBatteryRechargeMargin">2</integer>
 </resources>

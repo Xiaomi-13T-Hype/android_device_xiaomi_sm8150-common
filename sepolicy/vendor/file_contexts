@@ -14,6 +14,24 @@
 # Camera
 /mnt/vendor/persist/camera(/.*)?                                                                    u:object_r:vendor_persist_camera_file:s0
 /vendor/bin/remosaic_daemon                                                                         u:object_r:vendor_remosaic_daemon_exec:s0
+/(vendor|system/vendor)/lib(64)?/libmialgo.*\.so                                                    u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libarcsoft.*\.so                                                   u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libal[A-Za-z0-9_]*\.so                                             u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libmi[A-Za-z0-9_]*\.so                                             u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libsdk_sr\.so                                                      u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/librelight.*\.so                                                   u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libmpbase\.so                                                      u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libgrallocutils\.so                                                u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libqdMetaData\.so                                                  u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libgralloc\.qti\.so                                                u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libSNPE.*\.so                                                      u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libsnpe.*\.so                                                      u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libSuperSensor.*\.so                                               u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libHalSuperSensorServer\.so                                        u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libVDClearShot\.so                                                 u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libhta_hexagon_runtime\.so                                         u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/unnhal-acc-hta\.so                                                 u:object_r:same_process_hal_file:s0
+/(vendor|system/vendor)/lib(64)?/libc\+\+_shared\.so                                                u:object_r:same_process_hal_file:s0
 
 # Camera motor
 /dev/drv8846_dev                                                                                    u:object_r:motor_device:s0

@@ -30,3 +30,29 @@ unnhal-acc-hta.so
 libalhLDC.so
 libalAILDC.so
 libgrallocutils.so 64
+libarcsoft_dualcam_refocus_image.so 64
+libarcsoft_dualcam_refocus_video.so 64
+libarcsoft_hdr_detection.so 64
+libarcsoft_preview_deflicker.so 64
+libarcsoft_supernight.so 64
+librelight_only.so 64
+libmialgo_fs.so 64
+libmialgo_ie_capture.so 64
+libmialgo_image_colourkeeping.so 64
+libmialgo_rfs.so 64
+libmialgo_sd.so 64
+libmialgo_utils.so 64
+libmialgo_video_colourkeeping.so 64
+libmialgo_video_seg.so 64
+libmiai_portraitsupernight.so 64
+libmibokeh_712.so 64
+libmibokeh_845_video.so 64
+libmibokeh_855.so 64
+libmi_supernight_raw_checker.so 64
+libmi_supernight_raw.so 64
+libsdk_sr.so 64
+libalLDC.so 64
+libqdMetaData.so 64
+libgralloc.qti.so 64
+libgralloctypes.so 64
+libc++_shared.so 64

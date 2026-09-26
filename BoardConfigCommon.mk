@@ -194,6 +194,7 @@ VENDOR_SECURITY_PATCH := 2024-10-01
 # Sepolicy
 include device/qcom/sepolicy_vndr/SEPolicy.mk
 include device/lineage/sepolicy/libperfmgr/sepolicy.mk
+include packages/apps/GameSpace/sepolicy/sepolicy.mk
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/private
 SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/public
 BOARD_VENDOR_SEPOLICY_DIRS += $(COMMON_PATH)/sepolicy/vendor
@@ -205,6 +206,21 @@ SOONG_CONFIG_XIAOMI_MSMNILE := \
     PARTITION_SCHEME
 
 SOONG_CONFIG_XIAOMI_MSMNILE_PARTITION_SCHEME ?= dynamic
+
+# Lineage Health (Charging Control)
+SOONG_CONFIG_NAMESPACES += lineage_health
+SOONG_CONFIG_lineage_health += \
+    charging_control_charging_path \
+    charging_control_charging_enabled \
+    charging_control_charging_disabled \
+    charging_control_supports_toggle \
+    charging_control_supports_bypass
+
+SOONG_CONFIG_lineage_health_charging_control_charging_path := /sys/class/power_supply/battery/input_suspend
+SOONG_CONFIG_lineage_health_charging_control_charging_enabled := 0
+SOONG_CONFIG_lineage_health_charging_control_charging_disabled := 1
+SOONG_CONFIG_lineage_health_charging_control_supports_toggle := true
+SOONG_CONFIG_lineage_health_charging_control_supports_bypass := false
 
 # Treble
 BOARD_VNDK_VERSION := current

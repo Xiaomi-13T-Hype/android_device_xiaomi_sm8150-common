@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2020-2022 The LineageOS Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <!-- Popup camera settings -->
+    <string name="popup_led_title">Индикатор камеры</string>
+    <string name="popup_led_summary">Включать индикатор при появлении и скрытии фронтальной камеры</string>
+    <string name="popup_title">Звуковые эффекты фронтальной камеры</string>
+    <string name="popup_title_muqin">Ксилофон</string>
+    <string name="popup_title_yingyan">Кондор</string>
+    <string name="popup_title_mofa">Магия</string>
+    <string name="popup_title_jijia">Меха</string>
+    <string name="popup_title_chilun">Шестеренки</string>
+    <string name="popup_title_cangmen">Шлюз</string>
+
+    <!-- Popup camera strings -->
+    <string name="popup_camera_tip">Предупреждение</string>
+    <string name="popup_camera_takeback_failed_times_calibrate">Не удалось закрыть фронтальную камеру несколько раз. Попробуйте откалибровать камеру.</string>
+    <string name="popup_camera_popup_failed_times_calibrate">Не удалось открыть фронтальную камеру несколько раз. Попробуйте откалибровать камеру.</string>
+    <string name="popup_camera_calibrate_now">Калибровать</string>
+    <string name="popup_camera_calibrate_failed">Не удалось откалибровать</string>
+    <string name="popup_camera_calibrate_success">Калибровка выполнена успешно. Теперь вы можете открыть фронтальную камеру.</string>
+</resources>
