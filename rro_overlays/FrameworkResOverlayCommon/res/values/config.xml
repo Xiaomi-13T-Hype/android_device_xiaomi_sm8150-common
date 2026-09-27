@@ -254,15 +254,15 @@
      <bool name="config_enableUdcSysfsUsbStateUpdate">false</bool>
 
      <!-- Animation durations tuned for 120Hz/130Hz high refresh rate & HyperOS responsiveness -->
-     <integer name="config_shortAnimTime">150</integer>
-     <integer name="config_mediumAnimTime">300</integer>
-     <integer name="config_longAnimTime">400</integer>
-     <integer name="config_activityShortDur">150</integer>
-     <integer name="config_activityDefaultDur">220</integer>
-     <integer name="config_tooltipAnimTime">120</integer>
-     <integer name="config_screen_rotation_fade_out">100</integer>
-     <integer name="config_screen_rotation_fade_in">180</integer>
-     <integer name="config_screen_rotation_fade_in_delay">60</integer>
-     <integer name="config_screen_rotation_total_90">250</integer>
-     <integer name="config_screen_rotation_total_180">350</integer>
+     <integer name="config_shortAnimTime">120</integer>
+     <integer name="config_mediumAnimTime">240</integer>
+     <integer name="config_longAnimTime">340</integer>
+     <integer name="config_activityShortDur">110</integer>
+     <integer name="config_activityDefaultDur">180</integer>
+     <integer name="config_tooltipAnimTime">100</integer>
+     <integer name="config_screen_rotation_fade_out">80</integer>
+     <integer name="config_screen_rotation_fade_in">150</integer>
+     <integer name="config_screen_rotation_fade_in_delay">40</integer>
+     <integer name="config_screen_rotation_total_90">200</integer>
+     <integer name="config_screen_rotation_total_180">280</integer>
 </resources>
