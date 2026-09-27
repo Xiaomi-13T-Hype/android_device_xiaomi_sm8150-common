@@ -131,7 +131,7 @@ on early-boot
 # Silver Only configuration cannot work with 0-7
 on boot
     chown system system /sys/class/power_supply/battery/input_suspend
-    chmod 0660 /sys/class/power_supply/battery/input_suspend
+    chmod 0666 /sys/class/power_supply/battery/input_suspend
     chown system system /sys/kernel/hbtp/display_pwr
     chown system system /sys/kernel/qvr_external_sensor/fd
     chown system system /sys/class/drm/card0-DSI-1/doze_backlight
