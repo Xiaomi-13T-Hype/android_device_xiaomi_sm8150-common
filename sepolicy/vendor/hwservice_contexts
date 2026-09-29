@@ -13,3 +13,5 @@ vendor.xiaomi.hardware.motor::IMotor                                            
 # Dolby
 vendor.dolby.hardware.dms::IDms                                                                     u:object_r:hal_dms_hwservice:s0
 
+# Camera Post Processing
+vendor.xiaomi.hardware.campostproc::IMiPostProcService                                              u:object_r:hal_campostproc_hwservice:s0

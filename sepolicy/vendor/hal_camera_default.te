@@ -34,3 +34,7 @@ allow hal_camera_default mnt_vendor_file:dir search;
 
 # Suppress harmless default_prop audit noise
 dontaudit hal_camera_default default_prop:file read;
+
+# Allow Camera HAL to provide and find campostproc service
+add_hwservice(hal_camera_default, hal_campostproc_hwservice)
+allow hal_camera_default hal_campostproc_hwservice:hwservice_manager find;

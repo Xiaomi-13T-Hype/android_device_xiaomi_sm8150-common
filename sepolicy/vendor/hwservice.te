@@ -4,3 +4,4 @@ type hal_motor_hwservice, hwservice_manager_type;
 
 type hal_dms_hwservice, hwservice_manager_type;
 
+type hal_campostproc_hwservice, hwservice_manager_type;
