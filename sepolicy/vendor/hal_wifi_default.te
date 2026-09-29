@@ -1,3 +1,3 @@
-# Allow hal_wifi_default to access persist wifi debug property and search tombstone dir
-allow hal_wifi_default persist_vendor_debug_wifi_prop:file r_file_perms;
+# Allow hal_wifi_default to get persist wifi debug property and search tombstone dir
+get_prop(hal_wifi_default, persist_vendor_debug_wifi_prop)
 allow hal_wifi_default vendor_tombstone_data_file:dir search;
