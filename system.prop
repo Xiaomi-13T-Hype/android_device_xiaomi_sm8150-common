@@ -5,9 +5,14 @@ persist.vendor.audio_hal.dsp_bit_width_enforce_mode=24
 
 # Camera
 camera.disable_zsl_mode=true
-vendor.camera.aux.packagelist=org.codeaurora.snapcam,com.android.camera,net.sourceforge.opencamera,com.google.android.GoogleCameraEng,com.google.android.GoogleCamera,com.google.android.apps.googlecamera.fishfood
+vendor.camera.aux.packagelist=*
 persist.arm64.memtag.app.com.android.camera=off
 persist.arm64.memtag.app.com.google.android.GoogleCameraEng=off
+vendor.vidhance.enabled=0
+vendor.vidhance.preview.enabled=0
+vendor.vidhance.video.enabled=0
+vendor.vidhance.preview.deferwork=0
+vendor.vidhance.video.deferwork=0
 
 # Charger
 ro.charger.disable_init_blank=true
