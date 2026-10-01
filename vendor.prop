@@ -223,6 +223,7 @@ vendor.media.omx=0
 
 # OTG
 persist.sys.oem.otg_support=true
+persist.sys.battery_bypass_supported=true
 
 # PASR
 vendor.power.pasr.enabled=false
