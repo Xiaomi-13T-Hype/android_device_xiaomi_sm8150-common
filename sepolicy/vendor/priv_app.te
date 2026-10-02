@@ -14,4 +14,7 @@ binder_call(priv_app, hal_camera_default)
 get_prop(priv_app, vendor_audio_prop)
 get_prop(priv_app, qemu_hw_prop)
 
+# Allow NoKontzzz Manager to query swap/zram info
+allow priv_app proc_swaps:file r_file_perms;
+
 

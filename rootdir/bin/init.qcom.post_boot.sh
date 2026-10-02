@@ -5758,3 +5758,7 @@ esac
 misc_link=$(ls -l /dev/block/bootdevice/by-name/misc)
 real_path=${misc_link##*>}
 setprop persist.vendor.mmi.misc_dev_path $real_path
+
+# Bypass charging permissions for GameSpace and NoKontzzz Manager
+chmod 0666 /sys/class/power_supply/battery/input_suspend
+chmod 0666 /sys/devices/platform/soc/c440000.qcom,spmi/spmi-0/spmi0-02/c440000.qcom,spmi:qcom,pm8150b@2:qcom,qpnp-smb5/power_supply/battery/input_suspend
