@@ -216,11 +216,11 @@ SOONG_CONFIG_lineage_health += \
     charging_control_supports_toggle \
     charging_control_supports_bypass
 
-SOONG_CONFIG_lineage_health_charging_control_charging_path := /sys/class/power_supply/battery/input_suspend
-SOONG_CONFIG_lineage_health_charging_control_charging_enabled := 0
-SOONG_CONFIG_lineage_health_charging_control_charging_disabled := 1
+SOONG_CONFIG_lineage_health_charging_control_charging_path := /sys/class/power_supply/battery/charging_enabled
+SOONG_CONFIG_lineage_health_charging_control_charging_enabled := 1
+SOONG_CONFIG_lineage_health_charging_control_charging_disabled := 0
 SOONG_CONFIG_lineage_health_charging_control_supports_toggle := true
-SOONG_CONFIG_lineage_health_charging_control_supports_bypass := false
+SOONG_CONFIG_lineage_health_charging_control_supports_bypass := true
 
 # Treble
 BOARD_VNDK_VERSION := current
@@ -279,3 +279,7 @@ TARGET_BUILD_DEVICE_AS_WEBCAM := true
 
 # Inherit the proprietary files
 include vendor/xiaomi/sm8150-common/BoardConfigVendor.mk
+
+# Allow network access for post-build tasks in ninja sandbox
+BUILD_BROKEN_USES_NETWORK := true
+BUILD_BROKEN_NINJA_USES_ENV_VARS += http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY
